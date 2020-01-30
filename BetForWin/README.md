@@ -11,8 +11,17 @@ Dans la vue détails de match, on peut observer le nom des deux équipes, le sco
 
 ## Vue Classement
 Dans la vue Classement, il est possible d'observer le classement actuel de la ligue 1, chaque colonne à son rôle comme décrit ci-dessous.
-| Place au classement | Nom de l'équipe | Point de l'équipe | Match joué | Match gagné | Match nul | Match perdu | But marqué | But encaissé | Différence de but |
-| ------------- |: -------------: | ---------: |
+
+- Place au classement
+- Nom de l'équipe
+- Point de l'équipe
+- Match joué
+- Match gagné
+- Match nul
+- Match perdu
+- But marqué
+- But encaissé
+- Différence de but
 
 ## Pistes d'améliorations
 De nombreuses pistes d'améliorations sont a évoquer, comme par exemple afficher les joueurs qui ont marqué pendant le match ou pouvoir modifier le championnat dans lequel nous souhaitons avoir les résultats, toutefois, ce type d'API est généralement gratuit qu'en partie et ne permet pas de manipuler autant de donnée que nous le souhatons, en plus de cela j'ai découvert au cours du developpement de l'application l'accèssibilité à une autre API qui aurait pu me permettre de grandement améliorer mon application, en effet mon souhait de départ était de faire un ratio entre le pourcentage de chance qu'une équipe gagne et la côte du paris sportif, cela aurait permis de mettre en avant les côtes les plus interessante en terme de rapport chance/gain. Cependant je n'ai trouvé que trop tard cette API et en plus de cela, elle est extremement restrictive.
