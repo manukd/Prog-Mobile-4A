@@ -21,7 +21,9 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        // Initialise la journée actuelle
         initMatchDay()
+        // Initialise les matchs que l'on va afficher
         Matchs = initArray(matchday: self.currentDayMatch)
         self.pickerView.isHidden = true
         for i in 1...38 {// 38 journées dans les championnats européen
@@ -31,17 +33,19 @@ class ViewController: UIViewController {
                 pickerData.append("Journée n°\(i) (Journée actuelle)")
             }
         }
+        // Initialise la valeur du picker
         self.selectMatchday.text = pickerData[self.currentDayMatch - 1]
         self.pickerView.selectRow(self.currentDayMatch - 1, inComponent: 0, animated: true)
     }
 
+    // Fonction qui permet d'initialiser la journée actuelle
     func initMatchDay() {
         let semaphore = DispatchSemaphore(value: 0)
         let headers = [
             "x-rapidapi-host": "https://api.football-data.org/v2/",
             "X-Auth-Token": "ca272f4383e94374906b8d9a99d6a2c2"
         ]
-
+        // Créer la requête pour avoir des informations sur la compétiions souhaité (2015 = Ligue 1)
         let request = NSMutableURLRequest(url: NSURL(string: "https://api.football-data.org/v2/competitions/2015")! as URL)
         
         request.httpMethod = "GET"
@@ -58,10 +62,13 @@ class ViewController: UIViewController {
                     print("No data")
                     return
                 }
+                // Parse les données reçu
                 if let json = (try? JSONSerialization.jsonObject(with: content, options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any] {
                     if let currentSeason = json["currentSeason"] as? Dictionary<String, Any> {
                         if let matchday = currentSeason["currentMatchday"] as? Int {
+                            // Stock la journée actuelle
                             self.currentDayMatch = matchday
+                            // Émet le signal du semaphore
                             semaphore.signal()
                         }
                     }
@@ -72,10 +79,13 @@ class ViewController: UIViewController {
                 }
             }
         })
+        // Envoi la requête
         dataTask.resume()
+        // Permet d'être synchrone avec la requête et attend que le signal soit émis
         semaphore.wait()
     }
     
+    // Fonction qui permet de récupérer les matchs de la journée souhaité
     func initArray(matchday: Int) -> [Match] {
         let semaphore = DispatchSemaphore(value: 0)
         var resArray: [Match] = []
@@ -84,6 +94,7 @@ class ViewController: UIViewController {
             "X-Auth-Token": "ca272f4383e94374906b8d9a99d6a2c2"
         ]
 
+        // Créer la requête en ajouant en paramètre la journée souhaité
         let request = NSMutableURLRequest(url: NSURL(string: "https://api.football-data.org/v2/competitions/2015/matches?matchday=" + String(matchday))! as URL)
         
         request.httpMethod = "GET"
@@ -101,6 +112,7 @@ class ViewController: UIViewController {
                     print("No data")
                     return
                 }
+                // On parse les données des matchs
                 if let json = (try? JSONSerialization.jsonObject(with: content, options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any]
                 {
                     if let matchs = json["matches"] as? Array<Dictionary<String, Any>> {
@@ -113,6 +125,7 @@ class ViewController: UIViewController {
                             var actualScoreAT = 0
                             var matchDate = item["utcDate"]
                             var actualStatus = item["status"]
+                            // Stock les noms et ids des équipes
                             if let homeTeam = item["homeTeam"] as? Dictionary<String, Any> {
                                 actualHT = homeTeam["name"] as! String
                                 idHT = homeTeam["id"] as! Int
@@ -121,6 +134,7 @@ class ViewController: UIViewController {
                                 actualAT = awayTeam["name"] as! String
                                 idAT = awayTeam["id"] as! Int
                             }
+                            // Stock les scores des équipes précédentes
                             if let score = item["score"] as? Dictionary<String, Any> {
                                 if let fullTime = score["fullTime"] as? Dictionary<String, Any> {
                                     if (((fullTime["homeTeam"] as? Int) != nil) && ((fullTime["awayTeam"] as? Int) != nil)) {
@@ -130,6 +144,7 @@ class ViewController: UIViewController {
                                 }
                             }
                             let awayTeam = item["awayTeam"]
+                            // On ajoute les matchs créé à l'aide des données reçu dans le tableau renvoyé
                             let actualmatch = Match(team1: actualHT as! String, team2: actualAT as! String, scoreT1: String(actualScoreHT), scoreT2: String(actualScoreAT), status: actualStatus as! String, idT1: idHT, idT2: idAT, date: matchDate as! String)
                             resArray.append(actualmatch)
                         }
@@ -149,6 +164,7 @@ class ViewController: UIViewController {
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        // Prépare les données envoyé à la vue détails du match
         if segue.identifier == details_identifier {
             let detailViewController = segue.destination as! DetailsViewController
             let myIndexPath = self.tableView.indexPathForSelectedRow!
@@ -158,6 +174,7 @@ class ViewController: UIViewController {
     }
 }
 
+// Extension pour gérer la table view
 extension ViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return Matchs.count
@@ -171,6 +188,7 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
+// Extention pour gérer le picker
 extension ViewController: UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate {
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
         return 1
@@ -185,6 +203,7 @@ extension ViewController: UIPickerViewDelegate, UIPickerViewDataSource, UITextFi
     }
     
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        // Si la valeur du picker est modifiée on rafraichit nos données
         self.selectMatchday.text = self.pickerData[row]
         Matchs = []
         Matchs = self.initArray(matchday: row + 1)
