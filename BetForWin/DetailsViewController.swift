@@ -113,6 +113,7 @@ extension DetailsViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let player: Player
         let cell: PlayerCell
+        // Permet d'afficher dans l'une ou l'autre les joueurs de chaque équipe dans la table view qui lui est associé
         if(tableView == listeViewPlayerHT) {
             player = tabPlayersHT[indexPath.row]
             cell = listeViewPlayerHT.dequeueReusableCell(withIdentifier: "playerCell") as! PlayerCell
